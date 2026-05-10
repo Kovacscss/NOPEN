@@ -13,34 +13,93 @@ NOPEN Client — Remote Administration Tool
 --[ Traffic Obfuscation (AES-256-GCM frames disguised as DNS/HTTP)
 --[ Persistence & Cleanup (utmp/wtmp/lastlog wipe, in-memory exec)
 
-commands & usage:
+commands & usage (post-connect):
 
-  [active connect] Connect to NOPEN server
-        ├─ targets remote listener IP and port (default: 4444)
-        └─ executes RSA-2048 / AES-256-GCM mutual authentication
+  [ Arquitetura Passiva ]
+    -knock <p1,p2,p3> [tcp|udp]    Port-knock para acordar implante
+    -listen [porta] [timeout]      Aguarda implante conectar (modo passivo)
+    -obfs [raw|dns|http]           Define modo de ofuscação de tráfego
 
-  [listen & knock] Wake-up passive implant
-        ├─ -knock <p1,p2,p3> [tcp|udp]: Sends port-knock sequence
-        ├─ -listen [port]: Waits for implant to connect back (bypasses NAT)
-        └─ useful for stealthy, on-demand command and control
+  [ Limpeza de Rastros ]
+    -wipelogs [user] [host]        Limpa utmp/wtmp/lastlog/auth.log remotos
+    -shred <arquivo>               Destrói arquivo local (3 passes)
+    -wipelocal                     Limpa rastros na máquina LOCAL do operador
+    -memexec <script.py>           Executa script Python remoto SEM tocar disco
+    -memelf <binario>              Executa ELF remoto via memfd_create (RAM)
+    -burn                          BURN: wipe + encerra servidor + desconecta
 
-  [session commands] 
-        → -wipelogs
-            [1] Parses and cleans utmp/wtmp/lastlog structures on target
-            [2] Greps and removes specific traces from auth.log and syslog
-            [3] Rebuilds logs to ensure no file corruption is detected
+  [ Gerais ]
+    -elevate                       Verifica privilégios / SUID / sudo -l
+    -getenv                        Variáveis de ambiente remotas
+    -gs <padrão> [dir]             Busca arquivo por padrão
+    -setenv VAR=valor              Define variável remota
+    -shell                         Shell interativo local
+    -status                        Status completo da sessão
+    -time                          Data/hora UTC remota
+    -pid                           PID do processo servidor
 
-        → -memexec / -memelf
-            [1] Transmits Python script or ELF binary over encrypted channel
-            [2] Creates anonymous file descriptor via memfd_create
-            [3] Executes payload entirely in Volatile RAM (Zero disk footprint)
+  [ Rede Remota ]
+    -ifconfig                      Interfaces de rede
+    -nslookup <host>               Resolução DNS
+    -ping [-u|-t|-i] <host>        Ping avançado
+    -trace -r <target> [src]       Traceroute
+    -comptine <target> [src]       Traceroute ICMP furtivo
+    -scan [args]                   nmap / scanner de portas
+    -sentry <args>                 Captura de pacotes (tcpdump)
+    -tunnel <porta>                Tunelamento de porta
+    -vscan                         Scanner de vulnerabilidades
 
-        → -burn
-            [1] Transmits panic DESTRUCT_ORDER to server
-            [2] Scraps internal temp files, sockets, and logs
-            [3] Terminates remote process and drops connection
+  [ Redirecionamento ]
+    -fixudp <ip> <porta>           Corrige redirecionamento UDP
+    -irtun <target> <cb> <port>    Túnel reverso ICMP
+    -jackpop <tport> <srcip> <sp>  Port-knocking avançado
+    -nrtun <ip> <toip> [toport]    Túnel NAT reverso
+    -stun <toip:port>              NAT traversal STUN
+    -rawsend tcp <port>            Envio raw TCP
+    -rtun <porta> [toip [toport]]  Túnel reverso
+    -sutun [-t ttl] <toip> <port>  Túnel simétrico UDP
+    -chuli <ip> <porta>            Redireciona conexão
+
+  [ Arquivos Remotos ]
+    -cat [-s N] [-m max] <arquivo> Exibe arquivo remoto
+    -cksum <arquivo>               md5 + sha256
+    -cklist <padrão>               Verifica lista de arquivos
+    -get <arquivo>                 Baixa arquivo do servidor
+    -grep [-v|-n|-i] <pat> <arq>   Grep remoto
+    -lput <local> [dest]           Envia arquivo para servidor
+    -strings <arquivo>             Extrai strings
+    -tail [+/-n] <arquivo>         Fim de arquivo
+    -touch [-t] <arquivo>          Altera timestamps
+    -upload <arquivo> <porta>      Upload via porta
+    -mailgrep <args>               Busca em e-mails
+
+  [ Diretório Remoto ]
+    -ls [-la] [path]               Lista diretório
+    -find <args>                   Busca avançada
+    -cd <path>                     Muda diretório remoto
+    -cdp                           Exibe CWD remoto
+
+  [ Cliente Local ]
+    -autopilot <porta> [xml]       Modo autopilot
+    -cmdout [arquivo]              Redireciona saída para arquivo
+    -exit                          Encerra cliente NOPEN
+    -help                          Este menu
+    -hist                          Histórico de comandos da sessão
+    -readrc [arquivo]              Lê arquivo de comandos
+    -remark / -rem <texto>         Comentário no log
+    -reset                         Reseta estado da sessão
+
+  [ Ambiente Local ]
+    -lcd <dir>                     Muda diretório local
+    -lgetenv                       Variáveis locais
+    -lpwd                          Diretório local atual
+    -lsetenv VAR=valor             Define variável local
+    -lsh [-q] <cmd>                Executa comando localmente
 
 notes:
   - NOPEN Strict mode: only RSA-2048 / SHA-256 / AES-256-GCM are negotiated.
   - Trace wiping and memory execution require appropriate OS privileges (Root on Linux).
+  - Comandos sem prefixo são enviados direto ao shell remoto.
 ```
+
+> *This tool is inspired by NOPEN from the Equation Group (National Security Agency).*
