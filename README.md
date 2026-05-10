@@ -1,7 +1,7 @@
 ## NOPEN (Advanced Remote Administration)
 
 <p align="center">
-  <img src="Screenshot_nopen.png" width="600"/>
+  <img src="Screenshot_20.png" width="600"/>
 </p>
 
 ```console
